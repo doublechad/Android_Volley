@@ -28,20 +28,103 @@ public class MainActivity extends AppCompatActivity {
         queue= Volley.newRequestQueue(this);
     }
 
-
+   // http://localhost:8080/fsit04/Views_message?total_id=10
     public void login(View view) {
         sighin("test123@gmail.com","test123");
     }
 
     public void add(View view) {
-        String[] positions = new String[]{"10","11","99"};
-        addFavorite("1",positions);
+        addFavorite("1","3");
+    }
+    public void delect(View view) {
+        deleteFavorite("1","3");
+    }
+    public void addMsg(View view) {
+        addMessage("測試員01","10","安安你好");
+    }
+    public void getMsgByID(View view) {
+        getMessageByID("10");
+    }
+
+    /**
+     * http://36.234.10.186:8080/fsit04/Views_message?total_id=123
+     * @param total_id 景點ID
+     *
+     */
+    private void getMessageByID(String total_id) {
+        String url ="http://36.234.10.186:8080/fsit04/Views_message?total_id="+total_id;
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Log.v("chad",response);
+                        parseGetViews_message(response);
+                    }
+                }, null);
+        queue.add(stringRequest);
+    }
+
+    /**JSON解析地區留言
+     *
+     * @param response
+     */
+    private void parseGetViews_message(String response) {
+        try {
+            JSONArray array = new JSONArray(response);
+            //每一筆
+            for(int i=0;i<array.length();i++){
+                JSONObject obj1 = array.getJSONObject(i);
+                //留言的日期
+                String date =obj1.getString("date");
+                Log.v("chad",date);
+                //名稱
+                String user_name =obj1.getString("user_name");
+                Log.v("chad",user_name);
+                //留言的內容
+                String msg =obj1.getString("msg");
+                Log.v("chad",msg);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /** 留言
+     * http://36.234.10.186 :8080/fsit04/Views_message
+     * @param user_name   使用者id
+     * @param msg      留言
+     * @param total_id 景點id
+     */
+    private void addMessage(String user_name,String total_id,String msg) {
+        String url ="http://36.234.10.186:8080/fsit04/Views_message";
+        final String p1 =user_name;
+        final String p2=total_id;
+        final String p3=msg;
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+
+                        Log.v("chad",response);
+                    }
+                }, null){
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                HashMap<String,String> m1 =new HashMap<>();
+                m1.put("user_name",p1);
+                m1.put("total_id", p2);
+                m1.put("msg",p3);
+                return m1;
+            }
+        };
+        queue.add(stringRequest);
     }
 
     public void select(View view) {
         getFavorite("1");
     }
-    /**  http://36.234.13.158:8080/J2EE/sighin.jsp  登入
+    /**  http://36.234.10.186:8080/J2EE/sighin.jsp  登入
      *
      * @param mail        信箱 test123@gmail.com
      * @param password    密碼 test123
@@ -49,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
     private void sighin(String mail,String password){
         final String p1=mail;
         final String p2=password;
-        String url ="http://36.234.13.158:8080/J2EE/sighin.jsp";
+        String url ="http://36.234.10.186:8080/fsit04/sighin.jsp";
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
                new Response.Listener<String>() {
                    @Override
@@ -70,20 +153,17 @@ public class MainActivity extends AppCompatActivity {
         queue.add(stringRequest);
     }
 
-    /**  http://36.234.13.158:8080/J2EE/addFavorite.jsp  加入我的最愛
+    /**  http://36.234.10.186 :8080/J2EE/addFavorite.jsp  加入我的最愛
      *
      * @param user_id     用戶id
-     * @param total_ids   地點的id
+     * @param total_id   地點的id
      */
-    private void addFavorite(String user_id,String[] total_ids){
-        String url ="http://36.234.13.158:8080/J2EE/addFavorite.jsp";
+    private void addFavorite(String user_id,String total_id){
+        String url ="http://36.234.10.186:8080/fsit04/User_favorite";
 
         final String p1 =user_id;
-        final String[] p2=total_ids;
-        try {
-            final JSONArray array = new JSONArray(p2);
-
-            StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+        final String p2=total_id;
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
@@ -95,40 +175,59 @@ public class MainActivity extends AppCompatActivity {
                 protected Map<String, String> getParams() throws AuthFailureError {
                     HashMap<String,String> m1 =new HashMap<>();
                     m1.put("user_id",p1);
-                    m1.put("total_ids", array.toString());
+                    m1.put("total_id", p2);
                     return m1;
                 }
             };
+        queue.add(stringRequest);
 
+    }
+    /**  http://36.234.10.186 :8080/J2EE/addFavorite.jsp  刪除我的最愛
+     *
+     * @param user_id     用戶id
+     * @param total_id   地點的id
+     */
+    private void deleteFavorite(String user_id,String total_id){
+        String url ="http://36.234.10.186:8080/fsit04/User_favorite";
 
-            queue.add(stringRequest);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        final String p1 =user_id;
+        final String p2=total_id;
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Log.v("chad",response);
+                    }
+                }, null){
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                HashMap<String,String> m1 =new HashMap<>();
+                m1.put("_method","DELETE");
+                m1.put("user_id",p1);
+                m1.put("total_id", p2);
+
+                return m1;
+            }
+        };
+        queue.add(stringRequest);
+
     }
 
-    /** http://36.234.13.158:8080/J2EE/getFavorite.jsp 取得用戶我的最愛
-     *
+    /** 取得我的最愛
+     *  http://36.234.10.186:8080/fsit04/User_favorite
      * @param user_id 用戶id
      */
     private void getFavorite(String user_id){
         final String p1=user_id;
-        String url ="http://36.234.13.158:8080/J2EE/getFavorite.jsp";
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+        String url ="http://36.234.10.186:8080/fsit04/User_favorite?user_id="+p1;
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
                         parseGetFavorite(response);
 
                     }
-                }, null){
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                HashMap<String,String> m1 =new HashMap<>();
-                m1.put("mail",p1);
-                return m1;
-            }
-        };
+                }, null);
 
         queue.add(stringRequest);
     }
@@ -142,7 +241,8 @@ public class MainActivity extends AppCompatActivity {
             JSONArray array1 = new JSONArray(response);
             for(int i= 0;i<array1.length();i++) {
                 JSONObject ob1 =array1.getJSONObject(i);
-
+                String total_id = ob1.getString("total_id");
+                Log.v("chad",total_id);
                 String name = ob1.getString("name");
                 Log.v("chad",name);
 
@@ -183,6 +283,34 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
+    }
+
+    private void sendSpring(){
+
+            final String p1="999";
+            String url ="http://36.234.10.186:8080/MySpringMVC2/testRest/"+p1;
+            StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            parseGetFavorite(response);
+
+                        }
+                    }, null){
+                @Override
+                protected Map<String, String> getParams() throws AuthFailureError {
+                    HashMap<String,String> m1 =new HashMap<>();
+                    m1.put("_method","put");
+                    return m1;
+                }
+            };
+
+            queue.add(stringRequest);
+        }
+
+
+    public void springTEST(View view) {
+        sendSpring();
     }
 
 

@@ -19,8 +19,29 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:onClick="delect"
+        android:text="delect"/>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:onClick="select"
         android:text="select"/>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="addMsg"
+        android:text="addMsg"/>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="getMsgByID"
+        android:text="getMsgByID"/>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="springTEST"
+        android:text="springTEST"/>
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
