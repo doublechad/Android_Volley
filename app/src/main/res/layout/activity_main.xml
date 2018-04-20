@@ -39,8 +39,8 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="springTEST"
-        android:text="springTEST"/>
+        android:onClick="getRestruant"
+        android:text="getRestruant"/>
 
     <TextView
         android:layout_width="wrap_content"

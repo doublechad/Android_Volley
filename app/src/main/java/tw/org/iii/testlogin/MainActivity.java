@@ -30,14 +30,16 @@ public class MainActivity extends AppCompatActivity {
 
    // http://localhost:8080/fsit04/Views_message?total_id=10
     public void login(View view) {
-        sighin("test123@gmail.com","test123");
+        sighin("test123@gmail.com","test123","normal");
     }
-
     public void add(View view) {
-        addFavorite("1","3");
+        addFavorite("2","5");
+    }
+    public void select(View view) {
+        getFavorite("1");
     }
     public void delect(View view) {
-        deleteFavorite("1","3");
+        deleteFavorite("1","5");
     }
     public void addMsg(View view) {
         addMessage("測試員01","10","安安你好");
@@ -45,14 +47,17 @@ public class MainActivity extends AppCompatActivity {
     public void getMsgByID(View view) {
         getMessageByID("10");
     }
+    public void getRestruant(View view) {
+        getRest();
+    }
 
     /**
-     * http://36.234.10.186:8080/fsit04/Views_message?total_id=123
+     * http://36.235.38.228:8080/fsit04/Views_message?total_id=123
      * @param total_id 景點ID
      *
      */
     private void getMessageByID(String total_id) {
-        String url ="http://36.234.10.186:8080/fsit04/Views_message?total_id="+total_id;
+        String url ="http://36.235.38.228:8080/fsit04/Views_message?total_id="+total_id;
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
@@ -91,13 +96,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /** 留言
-     * http://36.234.10.186 :8080/fsit04/Views_message
+     * http://36.235.38.228:8080/fsit04/Views_message
      * @param user_name   使用者id
      * @param msg      留言
      * @param total_id 景點id
      */
     private void addMessage(String user_name,String total_id,String msg) {
-        String url ="http://36.234.10.186:8080/fsit04/Views_message";
+        String url ="http://36.235.38.228:8080/fsit04/Views_message";
         final String p1 =user_name;
         final String p2=total_id;
         final String p3=msg;
@@ -121,18 +126,19 @@ public class MainActivity extends AppCompatActivity {
         queue.add(stringRequest);
     }
 
-    public void select(View view) {
-        getFavorite("1");
-    }
-    /**  http://36.234.10.186:8080/J2EE/sighin.jsp  登入
-     *
+
+    /**  http://36.235.38.228:8080/J2EE/sighin.jsp  登入
+     *   注意類型 首次使用登入fb 登入者 會直接註冊
+     *   fb 登入者 密碼 可以隨便打 因為fb不會回傳密碼
      * @param mail        信箱 test123@gmail.com
      * @param password    密碼 test123
+     * @param type        類型 1.normal  2.fb
      */
-    private void sighin(String mail,String password){
+    private void sighin(String mail,String password,String type){
         final String p1=mail;
         final String p2=password;
-        String url ="http://36.234.10.186:8080/fsit04/sighin.jsp";
+        final String p3=type;
+        String url ="http://36.235.38.228:8080/fsit04/app/sighin";
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
                new Response.Listener<String>() {
                    @Override
@@ -145,6 +151,7 @@ public class MainActivity extends AppCompatActivity {
                     HashMap<String,String> m1 =new HashMap<>();
                     m1.put("mail",p1);
                     m1.put("password", p2);
+                    m1.put("type",p3);
                     return m1;
                 }
             };
@@ -153,13 +160,13 @@ public class MainActivity extends AppCompatActivity {
         queue.add(stringRequest);
     }
 
-    /**  http://36.234.10.186 :8080/J2EE/addFavorite.jsp  加入我的最愛
+    /**  http://36.235.38.228:8080/fsit04/User_favorite  加入我的最愛
      *
      * @param user_id     用戶id
      * @param total_id   地點的id
      */
     private void addFavorite(String user_id,String total_id){
-        String url ="http://36.234.10.186:8080/fsit04/User_favorite";
+        String url ="http://36.235.38.228:8080/fsit04/User_favorite";
 
         final String p1 =user_id;
         final String p2=total_id;
@@ -182,13 +189,13 @@ public class MainActivity extends AppCompatActivity {
         queue.add(stringRequest);
 
     }
-    /**  http://36.234.10.186 :8080/J2EE/addFavorite.jsp  刪除我的最愛
+    /**  http://36.235.38.228:8080/J2EE/addFavorite.jsp  刪除我的最愛
      *
      * @param user_id     用戶id
      * @param total_id   地點的id
      */
     private void deleteFavorite(String user_id,String total_id){
-        String url ="http://36.234.10.186:8080/fsit04/User_favorite";
+        String url ="http://36.235.38.228:8080/fsit04/User_favorite";
 
         final String p1 =user_id;
         final String p2=total_id;
@@ -214,12 +221,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /** 取得我的最愛
-     *  http://36.234.10.186:8080/fsit04/User_favorite
+     *  http://36.235.38.228:8080/fsit04/User_favorite
      * @param user_id 用戶id
      */
     private void getFavorite(String user_id){
         final String p1=user_id;
-        String url ="http://36.234.10.186:8080/fsit04/User_favorite?user_id="+p1;
+        String url ="http://36.235.38.228:8080/fsit04/User_favorite?user_id="+p1;
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
@@ -239,37 +246,40 @@ public class MainActivity extends AppCompatActivity {
     private void parseGetFavorite(String response){
         try {
             JSONArray array1 = new JSONArray(response);
+            Log.v("chad",array1.length()+"");
             for(int i= 0;i<array1.length();i++) {
                 JSONObject ob1 =array1.getJSONObject(i);
+                //地點ID
                 String total_id = ob1.getString("total_id");
                 Log.v("chad",total_id);
+                //地點名稱
                 String name = ob1.getString("name");
                 Log.v("chad",name);
-
+                //地點類型
                 String type= ob1.getString("type");
                 Log.v("chad",type);
-
+                //分類
                 String CAT2 = ob1.getString("CAT2");
                 Log.v("chad",CAT2);
-
+                //營業時間
                 String MEMO_TIME = ob1.getString("MEMO_TIME");
                 Log.v("chad",MEMO_TIME);
-
+                //地址
                 String address = ob1.getString("address");
                 Log.v("chad",address);
-
+                //簡介
                 String xbody = ob1.getString("xbody");
                 Log.v("chad",xbody);
-
+                //緯度
                 String lat = ob1.getString("lat");
                 Log.v("chad",lat);
-
+                //經度
                 String lng = ob1.getString("lng");
                 Log.v("chad",lng);
 
 
                 JSONArray imgs =ob1.getJSONArray("Img");
-                    for(int y= 0;y<array1.length();y++){
+                    for(int y= 0;y<imgs.length();y++){
                         String description =imgs.getJSONObject(y).getString("description");
                         Log.v("chad",description);
                         String imgUrl = imgs.getJSONObject(y).getString("url");
@@ -285,32 +295,77 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void sendSpring(){
+    /**
+     * 取得餐廳資訊
+     */
 
-            final String p1="999";
-            String url ="http://36.234.10.186:8080/MySpringMVC2/testRest/"+p1;
-            StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
-                    new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            parseGetFavorite(response);
+    private void getRest(){
 
-                        }
-                    }, null){
-                @Override
-                protected Map<String, String> getParams() throws AuthFailureError {
-                    HashMap<String,String> m1 =new HashMap<>();
-                    m1.put("_method","put");
-                    return m1;
+        String url ="http://36.235.38.228:8080/fsit04/restaruant";
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        parseRest(response);
+
+                    }
+                }, null);
+
+        queue.add(stringRequest);
+    }
+
+    /**
+     *  解析餐廳資訊
+     * @param response
+     */
+    private void parseRest(String response){
+        try {
+            JSONArray array1 = new JSONArray(response);
+            Log.v("chad",array1.length()+"");
+            for(int i= 0;i<array1.length();i++) {
+                JSONObject ob1 =array1.getJSONObject(i);
+                //地點ID
+                String total_id = ob1.getString("total_id");
+                Log.v("chad",total_id);
+                //地點名稱
+                String stitle = ob1.getString("stitle");
+                Log.v("chad",stitle);
+                //地點類型
+                String type= ob1.getString("type");
+                Log.v("chad",type);
+                //分類
+                String CAT2 = ob1.getString("CAT2");
+                Log.v("chad",CAT2);
+                //營業時間
+                String MEMO_TIME = ob1.getString("MEMO_TIME");
+                Log.v("chad",MEMO_TIME);
+                //地址
+                String address = ob1.getString("address");
+                Log.v("chad",address);
+                //簡介
+                String xbody = ob1.getString("xbody");
+                Log.v("chad",xbody);
+                //緯度
+                String lat = ob1.getString("lat");
+                Log.v("chad",lat);
+                //經度
+                String lng = ob1.getString("lng");
+                Log.v("chad",lng);
+
+                JSONArray imgs =ob1.getJSONArray("imgs");
+                for(int y= 0;y<imgs.length();y++){
+                    String description =imgs.getJSONObject(y).getString("description");
+                    Log.v("chad",description);
+                    String imgUrl = imgs.getJSONObject(y).getString("url");
+                    Log.v("chad",imgUrl);
                 }
-            };
 
-            queue.add(stringRequest);
+
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
-
-
-    public void springTEST(View view) {
-        sendSpring();
     }
 
 
