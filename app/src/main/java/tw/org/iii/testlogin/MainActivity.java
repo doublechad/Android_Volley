@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
         sighin("test999@gmail.com","測試員2號","","fb");
     }
     public void add(View view) {
-        addFavorite("2","5");
+        addFavorite("1","16");
     }
     public void select(View view) {
         getFavorite("1");
@@ -50,6 +50,10 @@ public class MainActivity extends AppCompatActivity {
     public void getRestruant(View view) {
         getRest();
     }
+    public void search(View view) { doSearch("台中");
+    }
+
+
 
     /**
      * http://36.235.38.228:8080/fsit04/Views_message?total_id=123
@@ -372,6 +376,34 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * http://36.235.38.228:8080/fsit04/Allviews?param=
+     * @param param  搜尋字
+     */
+    private void doSearch(String param) {
 
+        final String p1 =param;
+        String url = String.format("http://36.235.38.228:8080/fsit04/Allviews");
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        parseGetFavorite(response);
+
+                    }
+                }, null){
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                HashMap<String,String> m1 =new HashMap<>();
+
+                m1.put("param",p1);
+
+
+                return m1;
+            }
+        };
+
+        queue.add(stringRequest);
+    }
 
 }

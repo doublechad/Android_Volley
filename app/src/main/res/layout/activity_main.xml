@@ -41,6 +41,11 @@
         android:layout_height="wrap_content"
         android:onClick="getRestruant"
         android:text="getRestruant"/>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="search"
+        android:text="search"/>
 
     <TextView
         android:layout_width="wrap_content"
