@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
 
    // http://localhost:8080/fsit04/Views_message?total_id=10
     public void login(View view) {
-        sighin("test123@gmail.com","test123","normal");
+        sighin("test999@gmail.com","測試員2號","","fb");
     }
     public void add(View view) {
         addFavorite("2","5");
@@ -133,11 +133,14 @@ public class MainActivity extends AppCompatActivity {
      * @param mail        信箱 test123@gmail.com
      * @param password    密碼 test123
      * @param type        類型 1.normal  2.fb
+     * @param name        fb登入者輸入名字，一般登入者給空字串 ""
+     *
      */
-    private void sighin(String mail,String password,String type){
+    private void sighin(String mail,String name,String password,String type){
         final String p1=mail;
         final String p2=password;
         final String p3=type;
+        final String p4=name;
         String url ="http://36.235.38.228:8080/fsit04/app/sighin";
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
                new Response.Listener<String>() {
@@ -152,6 +155,7 @@ public class MainActivity extends AppCompatActivity {
                     m1.put("mail",p1);
                     m1.put("password", p2);
                     m1.put("type",p3);
+                    m1.put("name",p4);
                     return m1;
                 }
             };
