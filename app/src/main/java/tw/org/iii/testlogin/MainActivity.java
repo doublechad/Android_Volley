@@ -1,11 +1,21 @@
 package tw.org.iii.testlogin;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Environment;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -16,19 +26,49 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.HashMap;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
     private RequestQueue queue;
+    private File sdroot;
+    private Resources resources;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    0);
+        }else{
+            init();
+        }
+
+
+
+
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (grantResults.length > 0
+                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            init();
+        }
+    }
+    private void init() {
         queue= Volley.newRequestQueue(this);
+        sdroot = Environment.getExternalStorageDirectory();
+        resources =getResources();
     }
 
-   // http://localhost:8080/fsit04/Views_message?total_id=10
+    // http://localhost:8080/fsit04/Views_message?total_id=10
     public void login(View view) {
         sighin("test999@gmail.com","測試員2號","","fb");
     }
@@ -50,8 +90,10 @@ public class MainActivity extends AppCompatActivity {
     public void getRestruant(View view) {
         getRest();
     }
-    public void search(View view) { doSearch("台中");
-    }
+    public void search(View view) { doSearch("北投");}
+    public void uploadImg(View view) { uploadFile();}
+
+
 
 
 
@@ -404,6 +446,94 @@ public class MainActivity extends AppCompatActivity {
         };
 
         queue.add(stringRequest);
+    }
+
+    /**
+     * 上傳檔案用
+     * @param
+     *
+     * / http://36.235.38.228:8080/fsit04/photo?user_id=1  傳完到這邊看有沒有成功
+     */
+
+    private void uploadFile() {
+        String uploadUrl = "http://36.235.38.228:8080/fsit04/saveFile";
+        final byte[] data ;
+        //路徑上傳
+//        File upload =new File(sdroot,"檔案的路徑");
+//        data =filePathToByte(upload);
+
+
+        //BitMap上傳
+        Bitmap bmp = BitmapFactory.decodeResource(resources,R.drawable.test);
+        data=bitmapToBytes(bmp);
+
+        VolleyMultipartRequest multipartRequest =
+                new VolleyMultipartRequest(
+                        Request.Method.POST,
+                        uploadUrl,
+                        new Response.Listener<NetworkResponse>(){
+                            @Override
+                            public void onResponse(NetworkResponse response) {
+                                Log.v("brad", "code: " + response.statusCode);
+                            }
+                        },
+                        null){
+                    @Override
+                    protected Map<String, DataPart> getByteData()
+                            throws AuthFailureError {
+
+                        HashMap<String,DataPart> params = new HashMap<>();
+                        //傳檔案
+                        params.put("file",new DataPart("iii01.jpg", data));
+
+                        return params;
+                    }
+
+                    @Override
+                    protected Map<String, String> getParams() throws AuthFailureError {
+                        HashMap<String, String> m1 =new HashMap<>();
+                        //使用者ID
+                        m1.put("user_id","1");
+                        //景點ID
+                        m1.put("total_id","1");
+                        //lat
+                        m1.put("lat","25.00");
+                        //lng
+                        m1.put("lng","121.00");
+
+                        return m1;
+                    }
+                };
+
+        queue.add(multipartRequest);
+    }
+
+    /**
+     *
+     * @param file  檔案路徑轉BYTE 陣列
+     * @return
+     */
+    private byte[] filePathToByte(File file){
+        byte[] data = new byte[(int) file.length()];
+        try {
+            FileInputStream fin = new FileInputStream(file);
+            fin.read(data);
+            fin.close();
+        }catch (Exception e){
+
+        }
+
+        return data;
+    }
+    /**
+     *
+     * @param bm    Bitmap 轉Byte[];
+     * @return
+     */
+    private byte[] bitmapToBytes(Bitmap bm){
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bm.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        return baos.toByteArray();
     }
 
 }

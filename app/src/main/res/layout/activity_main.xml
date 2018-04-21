@@ -47,6 +47,12 @@
         android:onClick="search"
         android:text="search"/>
 
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="uploadImg"
+        android:text="uploadimg"/>
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
